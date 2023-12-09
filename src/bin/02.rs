@@ -23,7 +23,7 @@ advent_of_code::solution!(2);
     input.lines().filter_map(|mut line| {
         line = line.strip_prefix("Game ").unwrap();
         let number = |line: &mut &str| -> u32 { let (number, suffix) = line.split_once(|c| !char::is_digit(c, 10)).unwrap(); *line=suffix; number.parse().unwrap() };
-        let id = number(&mut line);
+        let _id = number(&mut line);
         let mut bag = [0,0,0];
         for reveal in line.split(';') {
             for component in reveal.split(',') {
