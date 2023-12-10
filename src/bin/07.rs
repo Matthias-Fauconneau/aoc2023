@@ -59,7 +59,7 @@ advent_of_code::solution!(7);
 		(type_rank, hand, bid.parse::<u32>().unwrap())
 	}).collect::<Box<_>>();
 	hands.sort();
-	hands.iter().enumerate().map(|(index, (type_rank, hand, bid))| {
+	hands.iter().enumerate().map(|(index, (_type_rank, hand, bid))| {
 		let rank = index+1;
 		let hand = hand.map(|c| cards[c]).iter().collect::<String>();
 		println!("{hand} {bid}");
