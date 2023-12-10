@@ -24,33 +24,35 @@ advent_of_code::solution!(8);
 		let (left, right) = next.trim().strip_prefix('(').unwrap().strip_suffix(')').unwrap().split_once(", ").unwrap();
 		(key, [left, right])
 	}).collect::<Box<_>>();
-	fn from_iter_or_default<T:Default, const N: usize>(mut iter: impl Iterator<Item=T>) -> [T; N] { [(); N].map(|_| iter.next().unwrap_or_default()) }
-	let [start, end] = ['A', 'Z'].map(|label| from_iter_or_default::<_, 6>(nodes.iter().enumerate().filter_map(|(i, &(k,_))| k.ends_with(label).then_some(i))));
-	let nodes = nodes.iter().map(|(_, nexts)| nexts.map(|next| nodes.iter().position(|&(k,_)| k==next).unwrap())).collect::<Box<_>>();
+	fn from_iter_or_default<T:Default, const N: usize>(mut iter: impl Iterator<Item=T>) -> [T; N] { std::array::from_fn(|_| iter.next().unwrap_or_default()) }
+	let [start, end] = ['A', 'Z'].map(|label| from_iter_or_default::<_, 6>(nodes.iter().enumerate().filter_map(|(i, &(k,_))| k.ends_with(label).then_some(Some(i)))));
+	//let ghosts = start.iter().filter_map(|&o| o).count();
+	println!("{start:?} {end:?}");
+	let [start, _end] = [start, end].map(|p| p.map(|o| o.unwrap_or(p[0].unwrap())));
+ 	let nodes = nodes.iter().map(|(_, nexts)| nexts.map(|next| nodes.iter().position(|&(k,_)| k==next).unwrap())).collect::<Box<_>>();
 	let mut position = start;
-	let mut count = 0;
-	let mut trace = Vec::new();
-	let start = std::time::Instant::now();
-	let mut last_status = std::time::Instant::now();
+	let mut trace = [(); 6].map(|_| Vec::new());
 	println!("Ghosts:{} × Sequence: {} × Nodes: {} = {}", position.len(), sequence.chars().count(), nodes.len(), position.len() * sequence.chars().count() * nodes.len());
-	for (_step_index, step) in sequence.chars().enumerate().cycle() {
-		/*if false {
-			let id = (_step_index, position.clone());
-			assert!(!trace.contains(&id));
-			trace.push(id);
-		}*/ trace.push(());
-		if last_status.elapsed().as_secs() >= 1 {
-			let total = position.len() * sequence.chars().count() * nodes.len();
-			let done = trace.len();
-			println!("{}K/{}K={:.0} Will be done within the next {} seconds", done/1000, total/1000, done as f32 / total as f32 * 100., start.elapsed().as_secs() as u128*(total-done) as u128/done as u128);
-			last_status = std::time::Instant::now();
+	let mut ghost_loop_len = [0; 6];
+	for (step_id, step) in sequence.chars().enumerate().cycle() {
+		for ((position, trace), ghost_loop_len) in position.iter().zip(&mut trace).zip(&mut ghost_loop_len) {
+			if *ghost_loop_len == 0 {
+				let id = (step_id, *position);
+				if trace.contains(&id) {
+					*ghost_loop_len = trace.len() - trace.iter().position(|&t| t==id).unwrap();
+					println!("{}", ghost_loop_len);
+				} else {
+					trace.push(id);
+				}
+			}
 		}
-		//println!("{step_index} {step} {position:?}");
+		if ghost_loop_len.iter().all(|&len|len > 0) { break; }
+		println!("{step_id} {step} {position:?}");
 		for position in position.iter_mut() { *position = nodes[*position][match step { 'L' => 0, 'R' => 1, _ => unreachable!()}] }
-		count += 1;
-		if position.iter().all(|position| end.contains(position)) { break; }
 	}
-	count
+	println!("{ghost_loop_len:?}");
+	fn gcd(mut a: usize, mut b: usize) -> usize { while b != 0 { (a,b) = (b, a % b) } a }
+	ghost_loop_len.into_iter().reduce(|a, b| a*b/gcd(a,b)).unwrap()
 }
 
 #[cfg(test)]
