@@ -24,14 +24,15 @@ advent_of_code::solution!(8);
 		let (left, right) = next.trim().strip_prefix('(').unwrap().strip_suffix(')').unwrap().split_once(", ").unwrap();
 		(key, [left, right])
 	}).collect::<Box<_>>();
-	let [start, end] = ['A', 'Z'].map(|label| nodes.iter().enumerate().filter_map(|(i, &(k,_))| k.ends_with(label).then_some(i)).collect::<Box<_>>());
+	fn from_iter_or_default<T:Default, const N: usize>(mut iter: impl Iterator<Item=T>) -> [T; N] { [(); N].map(|_| iter.next().unwrap_or_default()) }
+	let [start, end] = ['A', 'Z'].map(|label| from_iter_or_default::<_, 6>(nodes.iter().enumerate().filter_map(|(i, &(k,_))| k.ends_with(label).then_some(i))));
 	let nodes = nodes.iter().map(|(_, nexts)| nexts.map(|next| nodes.iter().position(|&(k,_)| k==next).unwrap())).collect::<Box<_>>();
 	let mut position = start;
 	let mut count = 0;
 	let mut trace = Vec::new();
 	let start = std::time::Instant::now();
 	let mut last_status = std::time::Instant::now();
-	println!("Ghotsts:{} × Sequence: {} × Nodes: {} = {}", position.len(), sequence.chars().count(), nodes.len(), position.len() * sequence.chars().count() * nodes.len());
+	println!("Ghosts:{} × Sequence: {} × Nodes: {} = {}", position.len(), sequence.chars().count(), nodes.len(), position.len() * sequence.chars().count() * nodes.len());
 	for (_step_index, step) in sequence.chars().enumerate().cycle() {
 		/*if false {
 			let id = (_step_index, position.clone());
