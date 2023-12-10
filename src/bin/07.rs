@@ -39,10 +39,11 @@ advent_of_code::solution!(7);
 		let mut histogram = [0; 13];
 		for card in hand { histogram[card] += 1; }
 		let mut jokers = histogram[0];
+		histogram[0] = 0;
 		histogram.sort();
 		histogram.reverse();
 		for count in &mut histogram {
-			let act = u32::min(5-*count, jokers);
+			let act = u32::min(jokers, 5-*count);
 			*count += act;
 			jokers -= act;
 		}
@@ -58,9 +59,10 @@ advent_of_code::solution!(7);
 		(type_rank, hand, bid.parse::<u32>().unwrap())
 	}).collect::<Box<_>>();
 	hands.sort();
-	hands.iter().enumerate().map(|(index, (_, _, bid))| {
+	hands.iter().enumerate().map(|(index, (type_rank, hand, bid))| {
 		let rank = index+1;
-		println!("{rank} {bid}");
+		let hand = hand.map(|c| cards[c]).iter().collect::<String>();
+		println!("{hand} {bid}");
 		rank as u32*bid
 	}).sum()
 }
@@ -72,12 +74,12 @@ mod tests {
 	#[test]
 	fn test_part_one() {
 		let result = part_one(&advent_of_code::template::read_file("examples", DAY));
-		assert_eq!(result, Some(6440));
+		assert_eq!(result, Some(6592));
 	}
 
 	#[test]
 	fn test_part_two() {
 		let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-		assert_eq!(result, Some(5905));
+		assert_eq!(result, Some(6839));
 	}
 }
