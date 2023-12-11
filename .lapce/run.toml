@@ -1,0 +1,4 @@
+[[configs]]
+name = "11"
+program = "cargo"
+args = ["test", "--bin", "11"]
