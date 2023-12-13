@@ -107,7 +107,6 @@ advent_of_code::solution!(10);
 	};
 	struct Walker { previous: (i32, i32), current: (i32, i32) }
 	let mut walkers : [_; 2] = from_iter([start; 2].iter().zip(next(start)).map(|(&previous, current)| Walker{previous, current}));
-	let mut steps = 1;
 	let ref mut trace = map.clone();
 	let step = |trace: &mut _, p| { let c = index_mut(trace, p); *c = match c {
 		'┌' => '╔',
@@ -127,7 +126,6 @@ advent_of_code::solution!(10);
 			[next, x] if x==previous => next,
 			_ => unreachable!(),
 		}});
-		steps += 1;
 	}
 	step(trace, walkers[0].current);
 	println!("{}", format(trace));
