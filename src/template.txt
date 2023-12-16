@@ -4,7 +4,7 @@ advent_of_code::solution!(%DAY_NUMBER%);
 	unimplemented!("{input}");
 }
 
-#[fehler::throws(as Option)]  pub fn part_two(_input: &str) -> u32 {
+#[fehler::throws(as Option)] pub fn part_two(_input: &str) -> u32 {
 	fehler::throw!();
 }
 
