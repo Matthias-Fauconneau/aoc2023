@@ -1,4 +1,4 @@
-#![feature(round_char_boundary)]
+//#![feature(round_char_boundary)]
 advent_of_code::solution!(1);
 
 #[fehler::throws(as Option)] pub fn part_one(input: &str) -> u32 {
@@ -22,7 +22,7 @@ advent_of_code::solution!(1);
                 return Some(digit)
             }
             else {
-                fn split_first(line:&str) -> &str { &line[line.ceil_char_boundary(1)..] } // Splits after first character (by byte would panic if breaking a UTF sequence (str is always valid UTF))
+                fn split_first(line:&str) -> &str { &line[/*line.ceil_char_boundary*/(1)..] } // Splits after first character
                 for (digit, token) in digits.iter().enumerate() {
                     if let Some(after_prefix) = line.strip_prefix(token) {
                         if false { // Robotic sequential reading: eighthree: eight hree, sevenine: seven ine
