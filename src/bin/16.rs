@@ -2,13 +2,13 @@ advent_of_code::solution!(16);
 
 #[fehler::throws(as Option)] pub fn part_one(input: &str) -> usize {
 	let ref mut geometry = input.lines().map(|line| line.chars().collect::<Box<_>>()).collect::<Box<_>>();
-	let ref mut energy = geometry.iter().map(|line| line.iter().map(|_| 0).collect::<Box<_>>()).collect::<Box<_>>();
+	let ref mut beams = geometry.iter().map(|line| line.iter().map(|_| Vec::new()).collect::<Box<_>>()).collect::<Box<_>>();
 	//enum Direction { Up, Left, Right, Down }
 	//struct Beam { position: [u32; 2], direction: Direction }
-	fn beam(geometry: &[Box<[char]>], [mut i, mut j]: [isize; 2], [mut di, mut dj]: [isize; 2], ref mut energy: &mut [Box<[u32]>]) {
+	fn beam(geometry: &[Box<[char]>], [mut i, mut j]: [isize; 2], [mut di, mut dj]: [isize; 2], ref mut beams: &mut [Box<[Vec<[isize; 2]>]>]) {
 		loop {
-			if i < 0  || i >= geometry.len() as isize || j<0 || j >= geometry[0].len() as isize || energy[i as usize][j as usize] >= 4 { return; }
-			energy[i as usize][j as usize] += 1;
+			if i < 0  || i >= geometry.len() as isize || j<0 || j >= geometry[0].len() as isize || beams[i as usize][j as usize].contains(&[di,dj]) { return; }
+			beams[i as usize][j as usize].push([di,dj]);
 			match geometry[i as usize][j as usize] {
 				'.' => {},
 				'/' => [di, dj] = match [di, dj] { [di, 0] => [0, -di], [0, dj] => [-dj, 0], _ => unreachable!() },
@@ -16,13 +16,13 @@ advent_of_code::solution!(16);
 				'|' if dj == 0 => {}
 				'-' if di == 0 => {}
 				'|' if dj != 0 => {
-					beam(geometry, [i-1, j], [-1, 0], energy);
-					beam(geometry, [i+1, j], [1, 0], energy);
+					beam(geometry, [i-1, j], [-1, 0], beams);
+					beam(geometry, [i+1, j], [1, 0], beams);
 					return;
 				}
 				'-' if di != 0 => {
-					beam(geometry, [i, j-1], [0, -1], energy);
-					beam(geometry, [i, j+1], [0, 1], energy);
+					beam(geometry, [i, j-1], [0, -1], beams);
+					beam(geometry, [i, j+1], [0, 1], beams);
 					return;
 				}
 				_ => unreachable!(),
@@ -30,10 +30,21 @@ advent_of_code::solution!(16);
 			[i,j] = [i+di, j+dj];
 		}
 	}
-	beam(geometry, [0, 0], [0, 1], energy);
+	beam(geometry, [0, 0], [0, 1], beams);
 	use itertools::Itertools;
-	println!("{}", energy.iter().format_with("\n", |e,f| f(&e.iter().format_with("", |&e,f| f(&if e>0 {'#'}else{'.'})))));
-	energy.into_iter().map(|row| row.into_iter()).flatten().filter(|&&e| e > 0).count()
+	println!("\n{}", beams.iter().format_with("\n", |e,f| f(&e.iter().format_with("", |e,f| f(&match e[..] {
+		[] => '.',
+		[[di,dj]] => match [di,dj] {
+			[-1,0] => '^',
+			[1,0] => 'v',
+			[0,-1] => '<',
+			[0,1] => '>',
+			_ => unreachable!(),
+		},
+		_ =>  char::from_digit(e.len() as u32, 36).unwrap(),
+	})))));
+	//println!("{}", beams.iter().format_with("\n", |e,f| f(&e.iter().format_with("", |e,f| f(&if e.is_empty() {'.'}else{'#'})))));
+	beams.into_iter().map(|row| row.into_iter()).flatten().filter(|&e| !e.is_empty()).count()
 }
 
 #[fehler::throws(as Option)]  pub fn part_two(_input: &str) -> u32 {
