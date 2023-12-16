@@ -23,7 +23,7 @@ advent_of_code::solution!(11);
 	let galaxies = space.iter().enumerate().map(|(i, row)| row.iter().enumerate().filter_map(move |(j, &c)| (c=='#').then_some([i,j]))).flatten().collect::<Box<_>>();
 	println!("{:?}", galaxies.iter().format(" "));
 	use std::cmp::{min, max};
-	galaxies.iter().tuple_combinations().map(|(a,b)| a.iter().zip(b).zip([rows_without_galaxies, columns_without_galaxies]).map(|((&a,&b), expand)| 
+	galaxies.iter().tuple_combinations().map(|(a,b)| a.iter().zip(b).zip([rows_without_galaxies, columns_without_galaxies]).map(|((&a,&b), expand)|
 		a.abs_diff(b)+(min(a,b)..max(a,b)).filter(|i| expand.contains(i)).count()*(1000000-1)).sum::<usize>()).sum::<usize>()
 }
 
