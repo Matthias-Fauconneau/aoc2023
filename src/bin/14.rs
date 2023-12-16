@@ -15,7 +15,10 @@ advent_of_code::solution!(14);
 }
 
 #[fehler::throws(as Option)]  pub fn part_two(input: &str) -> usize {
-	let mut rows = input.lines().map(|line| Box::<[u8]>::from(line.as_bytes())).collect::<Box<_>>();
+	let rows = input.lines().map(|line| Box::<[u8]>::from(line.as_bytes())).collect::<Box<_>>();
+	let [x, _y] = [rows[0].len(), rows.len()];
+	let mut grid = rows.into_iter().map(|row| row.into_iter().copied()).flatten().collect::<Box<_>>();
+
 	let start = std::time::Instant::now();
 	let mut last_status = std::time::Instant::now();
 	let total = 1_000_000_000;
@@ -24,48 +27,66 @@ advent_of_code::solution!(14);
 			println!("Will be done within the next {} seconds", start.elapsed().as_secs() as u128*(total-done) as u128/done as u128);
 			last_status = std::time::Instant::now();
 		}
-		// North
+		// Up
 		loop {
 			let mut any = false;
-			(0..rows.len()).map_windows(|&[top, bottom]|  {
-				for column in 0..rows[0].len() {
-					let [top, bottom] = rows.get_many_mut([top,bottom]).unwrap().map(|row| &mut row[column]);
-					if *top == b'.' && *bottom == b'O'  { std::mem::swap(top, bottom); any=true; }
-				}
-			}).for_each(|_|{});
+			let mut top = grid.as_mut_ptr();
+			let mut bottom = unsafe{grid.as_mut_ptr().add(x)};
+			let end = unsafe{grid.as_ptr().add(grid.len())};
+			while bottom as *const _< end {
+				if unsafe{*bottom} == b'O' && unsafe{*top} == b'.' { unsafe{*top=b'O'; *bottom=b'.';} any=true; }
+				bottom = unsafe{bottom.add(1)};
+				top = unsafe{top.add(1)};
+			}
 			if !any { break; }
 		}
-		// West
-		for _ in 0..rows[0].len() {
+		// Left
+		loop {
 			let mut any = false;
-			(0..rows[0].len()).map_windows(|&[left, right]|  {
-				for row in &mut *rows {
-					let [left, right] = row.get_many_mut([left,right]).unwrap();
-					if *left == b'.' && *right == b'O'  { std::mem::swap(left, right); any=true; }
+			let mut left = grid.as_mut_ptr();
+			let mut right = unsafe{grid.as_mut_ptr().add(1)};
+			let end = unsafe{grid.as_ptr().add(grid.len())};
+			while right as *const _< end {
+				let end = unsafe{grid.as_ptr().add(x)};
+				while right as *const _< end {
+					if unsafe{*right} == b'O' && unsafe{*left} == b'.' { unsafe{*left=b'O'; *right=b'.';} any=true; }
+					left = right;
+					right = unsafe{right.add(1)};
 				}
-			}).for_each(|_|{});
+				left = right;
+				right = unsafe{right.add(1)};
+			}
 			if !any { break; }
 		}
-		// South
-		for _ in 0..rows.len() {
+		// Down
+		loop {
 			let mut any = false;
-			(0..rows.len()).map_windows(|&[top, bottom]|  {
-				for column in 0..rows[0].len() {
-					let [top, bottom] = rows.get_many_mut([top,bottom]).unwrap().map(|row| &mut row[column]);
-					if *bottom == b'.' && *top == b'O'  { std::mem::swap(top, bottom); any=true; }
-				}
-			}).for_each(|_|{});
+			let mut top = grid.as_mut_ptr();
+			let mut bottom = unsafe{grid.as_mut_ptr().add(x)};
+			let end = unsafe{grid.as_ptr().add(grid.len())};
+			while bottom as *const _< end {
+				if unsafe{*top} == b'O' && unsafe{*bottom} == b'.' { unsafe{*top=b'.'; *bottom=b'O';} any=true; }
+				bottom = unsafe{bottom.add(1)};
+				top = unsafe{top.add(1)};
+			}
 			if !any { break; }
 		}
-		// East
-		for _ in 0..rows[0].len() {
+		// Right
+		loop {
 			let mut any = false;
-			(0..rows[0].len()).map_windows(|&[left, right]|  {
-				for row in &mut *rows {
-					let [left, right] = row.get_many_mut([left,right]).unwrap();
-					if *right == b'.' && *left == b'O'  { std::mem::swap(left, right); any=true; }
+			let mut left = grid.as_mut_ptr();
+			let mut right = unsafe{grid.as_mut_ptr().add(1)};
+			let end = unsafe{grid.as_ptr().add(grid.len())};
+			while right as *const _< end {
+				let end = unsafe{grid.as_ptr().add(x)};
+				while right as *const _< end {
+					if unsafe{*left} == b'O' && unsafe{*right} == b'.' { unsafe{*left=b'.'; *right=b'O';} any=true; }
+					left = right;
+					right = unsafe{right.add(1)};
 				}
-			}).for_each(|_|{});
+				left = right;
+				right = unsafe{right.add(1)};
+			}
 			if !any { break; }
 		}
 	}
