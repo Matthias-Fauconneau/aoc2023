@@ -13,21 +13,21 @@ pub fn part_one(input: &str) -> Option<u32> {
 		};
 		static BEST : std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(u32::MAX);
 		if BEST.load(std::sync::atomic::Ordering::Relaxed) <= path_heat_loss { return None; }
-		let stride = heat_loss[0].len();
+		let columns = heat_loss[0].len();
 		if [next_i as usize, next_j as _] == [heat_loss.len()-1, heat_loss[0].len()-1] {
 			if BEST.fetch_min(path_heat_loss, std::sync::atomic::Ordering::Relaxed) > path_heat_loss { println!("{path_heat_loss}"); }
 			use itertools::Itertools;
-			println!("{}\n", trace.chunks_exact(stride).format_with("\n", |e,f| f(&e.iter().map(|&trace| if trace{'x'}else{'.'}).format(""))));
+			println!("{}\n", trace.chunks_exact(columns).format_with("\n", |e,f| f(&e.iter().map(|&trace| if trace{'x'}else{'.'}).format(""))));
 			return Some(path_heat_loss)
 		}
 		match [di,dj] {
 			[di, 0] => for di in if di < 0 {di..0} else {1..di+1} {
-				let ref mut trace = trace[((previous_i+di) as usize)*stride+next_j as usize];
+				let ref mut trace = trace[((previous_i+di) as usize)*columns+next_j as usize];
 				if *trace { return None; }
 				*trace = true;
 			},
 			[0, dj] => for dj in if dj < 0 {dj..0} else {1..dj+1} {
-				let ref mut trace = trace[(next_i as usize)*stride+(previous_j+dj) as usize];
+				let ref mut trace = trace[(next_i as usize)*columns+(previous_j+dj) as usize];
 				if *trace { return None; }
 				*trace = true;
 			}
